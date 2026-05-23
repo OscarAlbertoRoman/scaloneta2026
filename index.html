@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Los 26 de La Scaloneta — Mundial 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky:#74ACDF; --white:#F5F5F5; --gold:#F6C90E;
+    --dark:#060A14; --navy:#0D1B3E; --mid:#1A2F5A;
+    --gk:#e8a020; --def:#4fc9a0; --mf:#74ACDF; --fwd:#e04f4f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--dark);color:var(--white);font-family:'Barlow Condensed',sans-serif;min-height:100vh;}
+
+  header{
+    background:linear-gradient(160deg,#0a1628 0%,var(--navy) 100%);
+    padding:28px 20px 22px; text-align:center;
+    border-bottom:2px solid rgba(116,172,223,0.25);
+    position:relative; overflow:hidden;
+  }
+  header::before{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(90deg,transparent 0,transparent 32px,rgba(116,172,223,0.03) 32px,rgba(116,172,223,0.03) 64px);}
+  .h-stars{font-size:22px;letter-spacing:10px;position:relative;margin-bottom:4px;}
+  h1{font-family:'Bebas Neue';font-size:clamp(44px,9vw,96px);letter-spacing:4px;line-height:1;position:relative;
+    background:linear-gradient(175deg,#fff 0%,var(--sky) 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .h-sub{position:relative;font-size:13px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-top:5px;}
+
+  .filters{
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+    padding:14px 20px;background:var(--navy);
+    border-bottom:1px solid rgba(116,172,223,0.12);
+    position:sticky;top:0;z-index:50;
+  }
+  .f-btn{
+    padding:5px 16px;border-radius:6px;cursor:pointer;
+    border:1px solid rgba(116,172,223,0.25);background:transparent;
+    color:rgba(245,245,245,0.55);font-family:'Barlow Condensed';
+    font-size:13px;letter-spacing:1.5px;text-transform:uppercase;transition:all .2s;
+  }
+  .f-btn:hover{background:rgba(116,172,223,0.1);color:var(--white);}
+  .f-btn.on{font-weight:700;color:var(--dark);}
+  .f-btn[data-p="ALL"].on{background:var(--white);border-color:var(--white);}
+  .f-btn[data-p="GK"].on{background:var(--gk);border-color:var(--gk);}
+  .f-btn[data-p="DEF"].on{background:var(--def);border-color:var(--def);}
+  .f-btn[data-p="MID"].on{background:var(--mf);border-color:var(--mf);}
+  .f-btn[data-p="FWD"].on{background:var(--fwd);border-color:var(--fwd);}
+
+  .hint-bar{text-align:center;padding:10px;font-size:12px;letter-spacing:3px;
+    color:rgba(245,245,245,0.35);text-transform:uppercase;}
+  .hint-bar span{color:var(--sky);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:12px;padding:16px 16px 32px;
+    max-width:1200px;margin:0 auto;
+  }
+
+  /* FLIP CARD */
+  .cw{height:230px;perspective:900px;cursor:pointer;}
+  .cw.hide{display:none;}
+
+  .ci{
+    position:relative;width:100%;height:100%;
+    transform-style:preserve-3d;
+    transition:transform .5s cubic-bezier(.4,0,.2,1);
+    border-radius:14px;
+  }
+  .ci.flipped{transform:rotateY(180deg);}
+
+  .cf,.cb{
+    position:absolute;inset:0;border-radius:14px;
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;
+  }
+
+  /* FRONT */
+  .cf{
+    background:linear-gradient(145deg,var(--navy),var(--mid));
+    border:1px solid rgba(116,172,223,0.18);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:14px 10px;text-align:center;transition:border-color .2s;
+  }
+  .cw:hover .cf{border-color:rgba(116,172,223,0.45);}
+  .cw.gold .cf{background:linear-gradient(145deg,#1a1400,#28200a);border-color:rgba(246,201,14,0.25);}
+
+  .pdot{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%;}
+  .gk-d{background:var(--gk);box-shadow:0 0 7px var(--gk);}
+  .def-d{background:var(--def);box-shadow:0 0 7px var(--def);}
+  .mid-d{background:var(--mf);box-shadow:0 0 7px var(--mf);}
+  .fwd-d{background:var(--fwd);box-shadow:0 0 7px var(--fwd);}
+
+  .gnum{position:absolute;bottom:4px;right:8px;font-family:'Bebas Neue';
+    font-size:52px;line-height:1;color:rgba(116,172,223,0.12);pointer-events:none;}
+  .cw.gold .gnum{color:rgba(246,201,14,0.1);}
+
+  .fphoto{
+    width:74px;height:74px;border-radius:50%;
+    border:2px solid rgba(116,172,223,0.3);
+    overflow:hidden;margin-bottom:10px;flex-shrink:0;
+    background:var(--mid);display:flex;align-items:center;justify-content:center;font-size:28px;
+  }
+  .fphoto img{width:100%;height:100%;object-fit:cover;object-position:top center;}
+
+  .fname{font-size:14px;font-weight:700;letter-spacing:.3px;line-height:1.2;color:var(--white);}
+  .fshort{font-size:11px;color:rgba(245,245,245,0.45);margin-top:2px;letter-spacing:.5px;}
+  .fpos{display:inline-block;margin-top:7px;padding:2px 10px;border-radius:4px;
+    font-size:10px;letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+  .pos-GK{background:rgba(232,160,32,.18);color:var(--gk);}
+  .pos-DEF{background:rgba(79,201,160,.18);color:var(--def);}
+  .pos-MID{background:rgba(116,172,223,.18);color:var(--mf);}
+  .pos-FWD{background:rgba(224,79,79,.18);color:var(--fwd);}
+  .pos-DT{background:rgba(246,201,14,.25);color:var(--gold);font-size:11px;}
+  .cw.dt .cf{background:linear-gradient(145deg,#0f1a00,#1f3000);border:2px solid rgba(246,201,14,0.6);box-shadow:0 0 24px rgba(246,201,14,0.15);}
+  .cw.dt .gnum{color:rgba(246,201,14,0.08);font-size:36px;bottom:8px;}
+  .dt-d{background:var(--gold);box-shadow:0 0 10px var(--gold);}
+  /* DT — featured card spanning full grid, reasonable height */
+  .dt-wrap{grid-column:1/-1;width:220px;height:260px;margin:0 auto 8px;}
+
+  .tap-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    font-size:9px;letter-spacing:1px;color:rgba(245,245,245,0.2);white-space:nowrap;}
+
+  /* BACK */
+  .cb{
+    transform:rotateY(180deg);
+    background:var(--dark);
+    border:1px solid rgba(116,172,223,0.35);
+    display:flex;flex-direction:column;
+  }
+  .bphoto{
+    flex:1;overflow:hidden;position:relative;background:var(--navy);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bphoto img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;}
+  .bphoto .noph{font-size:56px;}
+  .bstripe{position:absolute;top:0;left:0;right:0;height:3px;z-index:2;}
+  .bclose{
+    position:absolute;top:8px;right:8px;
+    width:22px;height:22px;border-radius:50%;
+    background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.75);
+    font-size:11px;display:flex;align-items:center;justify-content:center;
+    z-index:3;font-weight:700;
+  }
+  .binfo{padding:9px 12px;background:var(--navy);border-top:1px solid rgba(116,172,223,0.15);}
+  .bname{font-size:13px;font-weight:700;line-height:1.2;color:var(--white);}
+  .bclub{font-size:11px;color:var(--sky);margin-top:2px;}
+
+  footer{text-align:center;padding:20px;font-size:11px;letter-spacing:2px;
+    color:rgba(245,245,245,0.25);border-top:1px solid rgba(116,172,223,0.1);}
+
+  @media(max-width:480px){
+    .grid{grid-template-columns:1fr;gap:10px;padding:10px;}
+    .cw{height:90px;}
+    .ci{display:flex;flex-direction:row;}
+    .cf{
+      flex-direction:row;
+      align-items:center;
+      justify-content:flex-start;
+      padding:10px 14px;
+      gap:14px;
+      text-align:left;
+    }
+    .fphoto{width:58px;height:58px;margin-bottom:0;flex-shrink:0;}
+    .gnum{font-size:38px;bottom:0;right:6px;}
+    .fname{font-size:15px;}
+    .fshort{font-size:11px;}
+    .fpos{margin-top:4px;}
+    .tap-hint{bottom:4px;left:auto;right:8px;transform:none;font-size:8px;}
+    .pdot{top:10px;right:10px;}
+    /* Back en mobile: horizontal también */
+    .cb{flex-direction:row;}
+    .bphoto{width:90px;flex:none;height:100%;}
+    .binfo{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 12px;}
+    .bname{font-size:13px;}
+    .bclub{font-size:11px;}
+    /* DT card en mobile */
+    .dt-wrap{width:100%;height:100px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-stars">⭐⭐⭐</div>
+  <h1>LA SCALONETA</h1>
+  <p class="h-sub">DT + 26 Jugadores · Argentina · Mundial 2026</p>
+</header>
+
+<div class="filters">
+  <button class="f-btn on" data-p="ALL" onclick="setFilter('ALL')">🌐 Todos (27)</button>
+  <button class="f-btn" data-p="DT" onclick="setFilter('DT')">🏆 DT Scaloni</button>
+  <button class="f-btn" data-p="GK"  onclick="setFilter('GK')">🧤 Arqueros (3)</button>
+  <button class="f-btn" data-p="DEF" onclick="setFilter('DEF')">🛡️ Defensores (8)</button>
+  <button class="f-btn" data-p="MID" onclick="setFilter('MID')">⚙️ Mediocampistas (8)</button>
+  <button class="f-btn" data-p="FWD" onclick="setFilter('FWD')">⚡ Delanteros (7)</button>
+</div>
+
+<div class="hint-bar">Click en la tarjeta → foto · click de nuevo → vuelve · <span id="cnt">27 integrantes</span></div>
+<div class="grid" id="grid"></div>
+<footer>🔵⚪ SCALONETA2026.COM · Campeones del Mundo · 3 Estrellas 🏆</footer>
+
+<script>
+const PC = {GK:'#e8a020',DEF:'#4fc9a0',MID:'#74ACDF',FWD:'#e04f4f',DT:'#F6C90E'};
+const DC = {GK:'gk-d',DEF:'def-d',MID:'mid-d',FWD:'fwd-d',DT:'dt-d'};
+
+// 27 integrantes — DT + 26 jugadores
+const SQUAD = [
+  // DT
+  {n:0, name:"Lionel Scaloni", short:"El Arquitecto", club:"DT Selección Argentina", pos:"DT", star:true, photo:"DT_Lionel_Scaloni.jpg", emoji:"🏆"},
+  // ARQUEROS (3)
+  {n:1, name:"Franco Armani",          short:"Armani",        club:"River Plate",       pos:"GK",  star:false, photo:"01_Franco_Armani.jpg",                emoji:"🧤"},
+  {n:12,name:"Gerónimo Rulli",         short:"Rulli",         club:"Marseille",         pos:"GK",  star:false, photo:"12_Gerónimo_Rulli.jpg",               emoji:"🧤"},
+  {n:23,name:"Emiliano Martínez",      short:"Dibu",          club:"Aston Villa",       pos:"GK",  star:true,  photo:"23_Dibu_Martinez.jpg",                emoji:"🧤"},
+  // DEFENSORES (8)
+  {n:2, name:"Lucas Martínez Quarta",  short:"L.M.Quarta",    club:"Fiorentina",        pos:"DEF", star:false, photo:"02_Lucas_Martínez_Quarta.jpg",        emoji:"🛡️"},
+  {n:3, name:"Nicolás Tagliafico",     short:"Tagliafico",    club:"Ajax",              pos:"DEF", star:false, photo:"03_Nicolás_Tagliafico.jpg",           emoji:"🛡️"},
+  {n:4, name:"Gonzalo Montiel",        short:"Montiel",       club:"Nottm Forest",      pos:"DEF", star:false, photo:"04_Gonzalo_Montiel.jpg",              emoji:"🛡️"},
+  {n:6, name:"Germán Pezzella",        short:"Pezzella",      club:"Real Betis",        pos:"DEF", star:false, photo:"06_Germán_Pezzella.jpg",              emoji:"🛡️"},
+  {n:13,name:"Cristian Romero",        short:"Cuti",          club:"Tottenham",         pos:"DEF", star:true,  photo:"13_Cristian_Romero.jpg",              emoji:"🛡️"},
+  {n:19,name:"Nicolás Otamendi",       short:"Otamendi",      club:"Benfica",           pos:"DEF", star:false, photo:"19_Nicolás_Otamendi.jpg",             emoji:"🛡️"},
+  {n:25,name:"Lisandro Martínez",      short:"Licha",         club:"Man United",        pos:"DEF", star:true,  photo:"25_Lisandro_Martínez.jpg",            emoji:"🛡️"},
+  {n:26,name:"Nahuel Molina",          short:"Molina",        club:"Atlético Madrid",   pos:"DEF", star:false, photo:"26_Nahuel_Molina.jpg",                emoji:"🛡️"},
+  // MEDIOCAMPISTAS (8)
+  {n:5, name:"Leandro Paredes",        short:"Paredes",       club:"Roma",              pos:"MID", star:false, photo:"05_Leandro_Paredes.jpg",              emoji:"⚙️"},
+  {n:7, name:"Rodrigo De Paul",        short:"De Paul",       club:"Atlético Madrid",   pos:"MID", star:true,  photo:"07_Rodrigo_De_Paul.jpg",              emoji:"⚙️"},
+  {n:8, name:"Marcos Acuña",           short:"El Colo",       club:"River Plate",       pos:"MID", star:false, photo:"08_Marcos_Acuña.jpg",                 emoji:"⚙️"},
+  {n:14,name:"Exequiel Palacios",      short:"Palacios",      club:"B. Leverkusen",     pos:"MID", star:false, photo:"14_Exequiel_Palacios.jpg",            emoji:"⚙️"},
+  {n:16,name:"Giovani Lo Celso",       short:"Lo Celso",      club:"Villarreal",        pos:"MID", star:false, photo:"16_Giovani_Lo_Celso.jpg",             emoji:"⚙️"},
+  {n:18,name:"Guido Rodríguez",        short:"Guido",         club:"Real Betis",        pos:"MID", star:false, photo:"18_Guido_Rodríguez.jpg",              emoji:"⚙️"},
+  {n:20,name:"Alexis Mac Allister",    short:"Mac Allister",  club:"Liverpool",         pos:"MID", star:true,  photo:"20_Alexis_Mac_Allister.jpg",          emoji:"⚙️"},
+  {n:24,name:"Enzo Fernández",         short:"Enzo",          club:"Chelsea",           pos:"MID", star:true,  photo:"24_Enzo_Fernández.jpg",               emoji:"⚙️"},
+  // DELANTEROS (7)
+  {n:9, name:"Julián Álvarez",         short:"La Araña",      club:"Atlético Madrid",   pos:"FWD", star:true,  photo:"09_Julián_Álvarez.jpg",               emoji:"🕷️"},
+  {n:10,name:"Lionel Messi",           short:"MESSI",         club:"Inter Miami",       pos:"FWD", star:true,  photo:"10_Lionel_Messi.jpg",                 emoji:"🐐"},
+  {n:11,name:"Ángel Di María",         short:"El Fideo",      club:"Benfica",           pos:"FWD", star:true,  photo:"11_Ángel_Di_María.jpg",               emoji:"🪄"},
+  {n:15,name:"Nicolás González",       short:"Nico G",        club:"Juventus",          pos:"FWD", star:false, photo:"15_Nicolás_González.jpg",             emoji:"⚡"},
+  {n:17,name:"Alejandro Garnacho",     short:"Garnacho",      club:"Man United",        pos:"FWD", star:false, photo:"17_Alejandro_Garnacho.jpg",           emoji:"⚡"},
+  {n:21,name:"Valentín Carboni",       short:"Carboni",       club:"Inter Milan",       pos:"FWD", star:false, photo:"21_Valentín_Carboni.jpg",             emoji:"⭐"},
+  {n:22,name:"Lautaro Martínez",       short:"El Toro",       club:"Inter Milan",       pos:"FWD", star:true,  photo:"22_Lautaro_Martínez.jpg",             emoji:"⚡"},
+];
+
+let cur = null;
+
+function build() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  SQUAD.forEach((p,i) => {
+    const src = p.photo ? `img/${p.photo}` : null;
+    const isDT = p.pos === 'DT';
+    const w = document.createElement('div');
+    w.className = p.pos==='DT' ? 'cw gold dt dt-wrap' : `cw${p.star?' gold':''}`;
+    w.dataset.pos = p.pos;
+
+    const photoStyle = isDT ? "border:2px solid rgba(246,201,14,0.7);width:82px;height:82px;" : "";
+    const frontImg = src
+      ? `<img src="${src}" alt="${p.name}" onerror="this.parentNode.innerHTML='<span>${p.emoji}</span>'">`
+      : `<span>${p.emoji}</span>`;
+
+    const backImg = src
+      ? `<img src="${src}" alt="${p.name}" onerror="this.outerHTML='<div class=noph>${p.emoji}</div>'">`
+      : `<div class="noph">${p.emoji}</div>`;
+
+    w.innerHTML = `
+      <div class="ci" id="ci${i}">
+        <div class="cf">
+          <div class="pdot ${DC[p.pos]}"></div>
+          <div class="gnum">${p.n}</div>
+          <div class="fphoto" style="${photoStyle}">${frontImg}</div>
+          <div class="fname">${p.name}</div>
+          <div class="fshort">${p.short}</div>
+          <div class="fpos pos-${p.pos}">${p.pos}</div>
+          <div class="tap-hint">tap para foto</div>
+        </div>
+        <div class="cb">
+          <div class="bphoto">
+            <div class="bstripe" style="background:${PC[p.pos]}"></div>
+            ${backImg}
+          </div>
+          <div class="bclose">✕</div>
+          <div class="binfo">
+            <div class="bname">${p.name}<span style="color:${PC[p.pos]};font-size:11px"> #${p.n}</span></div>
+            <div class="bclub">🏟️ ${p.club}</div>
+          </div>
+        </div>
+      </div>`;
+
+    w.addEventListener('click', () => flip(i));
+    g.appendChild(w);
+  });
+}
+
+function flip(i) {
+  const el = document.getElementById(`ci${i}`);
+  if (!el) return;
+  if (cur !== null && cur !== i) {
+    document.getElementById(`ci${cur}`)?.classList.remove('flipped');
+  }
+  const wasFlipped = el.classList.contains('flipped');
+  el.classList.toggle('flipped', !wasFlipped);
+  cur = wasFlipped ? null : i;
+}
+
+function setFilter(pos) {
+  if (cur !== null) {
+    document.getElementById(`ci${cur}`)?.classList.remove('flipped');
+    cur = null;
+  }
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('on'));
+  document.querySelector(`[data-p="${pos}"]`).classList.add('on');
+  let count = 0;
+  document.querySelectorAll('.cw').forEach(c => {
+    const show = pos === 'ALL' || c.dataset.pos === pos;
+    c.classList.toggle('hide', !show);
+    if (show) count++;
+  });
+  const labels = {ALL:'27 integrantes',DT:'1 DT',GK:'3 arqueros',DEF:'8 defensores',MID:'8 mediocampistas',FWD:'7 delanteros'};
+  document.getElementById('cnt').textContent = labels[pos];
+}
+
+build();
+</script>
+</body>
+</html>
