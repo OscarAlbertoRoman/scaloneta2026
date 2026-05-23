@@ -150,6 +150,34 @@
   footer{text-align:center;padding:20px;font-size:11px;letter-spacing:2px;
     color:rgba(245,245,245,0.25);border-top:1px solid rgba(116,172,223,0.1);}
 
+  /* FULLSCREEN OVERLAY (mobile) */
+  #overlay{
+    display:none;position:fixed;inset:0;z-index:999;
+    background:rgba(0,0,0,0.96);
+    flex-direction:column;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  #overlay.show{display:flex;}
+  #ov-img{
+    max-width:100%;max-height:80vh;
+    object-fit:contain;border-radius:8px;
+    box-shadow:0 0 40px rgba(0,0,0,0.8);
+  }
+  #ov-info{
+    margin-top:18px;text-align:center;
+  }
+  #ov-name{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;color:var(--white);}
+  #ov-club{font-size:13px;color:var(--sky);margin-top:4px;letter-spacing:1px;}
+  #ov-pos{display:inline-block;margin-top:8px;padding:3px 12px;border-radius:4px;
+    font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+  #ov-close{
+    position:absolute;top:16px;right:16px;
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+    color:white;font-size:18px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+
   @media(max-width:480px){
     .grid{grid-template-columns:1fr;gap:10px;padding:10px;}
     .cw{height:90px;}
@@ -199,6 +227,17 @@
 
 <div class="hint-bar">Click en la tarjeta → foto · click de nuevo → vuelve · <span id="cnt">27 integrantes</span></div>
 <div class="grid" id="grid"></div>
+
+<!-- Overlay pantalla completa (mobile) -->
+<div id="overlay" onclick="closeOverlay()">
+  <div id="ov-close">✕</div>
+  <img id="ov-img" src="" alt="">
+  <div id="ov-info">
+    <div id="ov-name"></div>
+    <div id="ov-club"></div>
+    <div id="ov-pos"></div>
+  </div>
+</div>
 <footer>🔵⚪ SCALONETA2026.COM · Campeones del Mundo · 3 Estrellas 🏆</footer>
 
 <script>
@@ -286,10 +325,51 @@ function build() {
         </div>
       </div>`;
 
-    w.addEventListener('click', () => flip(i));
+    w.addEventListener('click', () => handleTap(i, p));
     g.appendChild(w);
   });
 }
+
+function isMobile() { return window.innerWidth <= 480; }
+
+function handleTap(i, p) {
+  if (isMobile()) {
+    openOverlay(p);
+  } else {
+    flip(i);
+  }
+}
+
+function openOverlay(p) {
+  const src = p.photo ? `img/${p.photo}` : null;
+  const PC = {GK:'#e8a020',DEF:'#4fc9a0',MID:'#74ACDF',FWD:'#e04f4f',DT:'#F6C90E'};
+  const posLabel = {GK:'Arquero',DEF:'Defensor',MID:'Mediocampista',FWD:'Delantero',DT:'Director Técnico'};
+
+  const img = document.getElementById('ov-img');
+  img.src = src || '';
+  img.alt = p.name;
+  img.onerror = () => { img.style.display='none'; };
+  img.style.display = 'block';
+
+  document.getElementById('ov-name').textContent = p.name;
+  document.getElementById('ov-club').textContent = '🏟️ ' + p.club;
+
+  const posEl = document.getElementById('ov-pos');
+  posEl.textContent = posLabel[p.pos] || p.pos;
+  posEl.className = 'fpos pos-' + p.pos;
+  posEl.style.cssText = '';
+
+  document.getElementById('overlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOverlay() {
+  document.getElementById('overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// Cerrar con tecla Escape (desktop)
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeOverlay(); });
 
 function flip(i) {
   const el = document.getElementById(`ci${i}`);
