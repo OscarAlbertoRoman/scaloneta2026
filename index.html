@@ -54,9 +54,9 @@
 
   .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
     gap:12px;padding:16px 16px 32px;
-    max-width:1200px;margin:0 auto;
+    max-width:1100px;margin:0 auto;
   }
 
   /* FLIP CARD */
@@ -150,32 +150,56 @@
   footer{text-align:center;padding:20px;font-size:11px;letter-spacing:2px;
     color:rgba(245,245,245,0.25);border-top:1px solid rgba(116,172,223,0.1);}
 
-  /* FULLSCREEN OVERLAY (mobile) */
+  /* FULLSCREEN OVERLAY */
   #overlay{
     display:none;position:fixed;inset:0;z-index:999;
     background:rgba(0,0,0,0.96);
-    flex-direction:column;align-items:center;justify-content:center;
-    padding:20px;
+    align-items:center;justify-content:center;
+    padding:24px;gap:40px;
   }
   #overlay.show{display:flex;}
+
   #ov-img{
-    max-width:100%;max-height:80vh;
-    object-fit:contain;border-radius:8px;
-    box-shadow:0 0 40px rgba(0,0,0,0.8);
+    height:90vh;max-height:90vh;
+    width:auto;max-width:55vw;
+    object-fit:contain;border-radius:10px;
+    box-shadow:0 8px 60px rgba(0,0,0,0.9);
+    flex-shrink:0;
   }
   #ov-info{
-    margin-top:18px;text-align:center;
+    display:flex;flex-direction:column;justify-content:center;
+    max-width:280px;
   }
-  #ov-name{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;color:var(--white);}
-  #ov-club{font-size:13px;color:var(--sky);margin-top:4px;letter-spacing:1px;}
-  #ov-pos{display:inline-block;margin-top:8px;padding:3px 12px;border-radius:4px;
-    font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+  #ov-num{
+    font-family:'Bebas Neue';font-size:100px;line-height:1;
+    color:rgba(255,255,255,0.06);margin-bottom:-10px;
+  }
+  #ov-name{font-family:'Bebas Neue';font-size:38px;letter-spacing:2px;
+    line-height:1.1;color:var(--white);}
+  #ov-short{font-size:14px;color:rgba(255,255,255,0.4);letter-spacing:2px;
+    text-transform:uppercase;margin-top:4px;}
+  #ov-club{font-size:15px;color:var(--sky);margin-top:16px;letter-spacing:1px;}
+  #ov-pos{display:inline-block;margin-top:12px;padding:4px 14px;border-radius:4px;
+    font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase;width:fit-content;}
+  #ov-hint{margin-top:40px;font-size:11px;letter-spacing:2px;
+    color:rgba(255,255,255,0.18);text-transform:uppercase;}
   #ov-close{
-    position:absolute;top:16px;right:16px;
-    width:36px;height:36px;border-radius:50%;
-    background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+    position:absolute;top:20px;right:20px;
+    width:40px;height:40px;border-radius:50%;
+    background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
     color:white;font-size:18px;display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
+    cursor:pointer;transition:background .2s;
+  }
+  #ov-close:hover{background:rgba(255,255,255,0.18);}
+
+  /* En mobile: columna centrada */
+  @media(max-width:480px){
+    #overlay{flex-direction:column;gap:20px;padding:20px;}
+    #ov-img{height:auto;max-height:60vh;max-width:100%;width:100%;}
+    #ov-info{max-width:100%;align-items:center;text-align:center;}
+    #ov-num{display:none;}
+    #ov-name{font-size:26px;}
+    #ov-hint{display:none;}
   }
 
   @media(max-width:480px){
@@ -228,14 +252,17 @@
 <div class="hint-bar">Click en la tarjeta → foto · click de nuevo → vuelve · <span id="cnt">27 integrantes</span></div>
 <div class="grid" id="grid"></div>
 
-<!-- Overlay pantalla completa (mobile) -->
+<!-- Overlay pantalla completa -->
 <div id="overlay" onclick="closeOverlay()">
-  <div id="ov-close">✕</div>
+  <div id="ov-close" onclick="closeOverlay()">✕</div>
   <img id="ov-img" src="" alt="">
   <div id="ov-info">
+    <div id="ov-num"></div>
     <div id="ov-name"></div>
+    <div id="ov-short"></div>
     <div id="ov-club"></div>
     <div id="ov-pos"></div>
+    <div id="ov-hint">ESC o click para cerrar</div>
   </div>
 </div>
 <footer>🔵⚪ SCALONETA2026.COM · Campeones del Mundo · 3 Estrellas 🏆</footer>
@@ -330,19 +357,12 @@ function build() {
   });
 }
 
-function isMobile() { return window.innerWidth <= 480; }
-
 function handleTap(i, p) {
-  if (isMobile()) {
-    openOverlay(p);
-  } else {
-    flip(i);
-  }
+  openOverlay(p);
 }
 
 function openOverlay(p) {
   const src = p.photo ? `img/${p.photo}` : null;
-  const PC = {GK:'#e8a020',DEF:'#4fc9a0',MID:'#74ACDF',FWD:'#e04f4f',DT:'#F6C90E'};
   const posLabel = {GK:'Arquero',DEF:'Defensor',MID:'Mediocampista',FWD:'Delantero',DT:'Director Técnico'};
 
   const img = document.getElementById('ov-img');
@@ -351,13 +371,14 @@ function openOverlay(p) {
   img.onerror = () => { img.style.display='none'; };
   img.style.display = 'block';
 
+  document.getElementById('ov-num').textContent = p.n || '';
   document.getElementById('ov-name').textContent = p.name;
+  document.getElementById('ov-short').textContent = p.short;
   document.getElementById('ov-club').textContent = '🏟️ ' + p.club;
 
   const posEl = document.getElementById('ov-pos');
   posEl.textContent = posLabel[p.pos] || p.pos;
   posEl.className = 'fpos pos-' + p.pos;
-  posEl.style.cssText = '';
 
   document.getElementById('overlay').classList.add('show');
   document.body.style.overflow = 'hidden';
